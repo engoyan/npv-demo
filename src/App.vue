@@ -72,6 +72,20 @@
           </v-flex>
         </v-layout>
       </v-container>
+
+      <v-snackbar
+        :timeout="10000"
+        color="error"
+        multi-line
+        vertical
+        v-model="snackbar"
+      >
+        There is an error in calucation with the input data. 
+        Make sure every Cash Flow transaction is a new line 
+        with a following format "{TransationDate} {CashFlow}"
+        <v-btn dark flat @click.native="snackbar = false">Close</v-btn>
+      </v-snackbar>
+
     </v-content>
   </v-app>
 </template>
@@ -82,6 +96,7 @@
 
   export default {
     data: () => ({
+      snackbar: false,
       dark: false,
       dateFormatted: "04/01/2018",
       menu: false,
@@ -113,17 +128,23 @@
 
     methods: {
       calculate () {
-        const flow = this.cashFlows.split("\n")
-        this.data = flow.map(transaction => {
-          const [date, cashFlow] = transaction.split(' ')
-          const d = moment(date).diff(moment(this.date), 'days')
-          const pv = parseFloat(cashFlow.replace(',','')) / Math.pow(1 + parseInt(this.discountRate)/100, d/365)
-          return {
-            date, 
-            cashFlow,
-            pv: Math.round(pv * 100) / 100
-          }
-        })
+        try {
+
+          const flow = this.cashFlows.split("\n")
+          this.data = flow.map(transaction => {
+            const [date, cashFlow] = transaction.split(' ')
+            const d = moment(date).diff(moment(this.date), 'days')
+            const pv = parseFloat(cashFlow.replace(',','')) / Math.pow(1 + parseInt(this.discountRate)/100, d/365)
+            return {
+              date, 
+              cashFlow,
+              pv: Math.round(pv * 100) / 100
+            }
+          })
+          
+        } catch (error) {
+          this.snackbar = true
+        }
       },
       formatDate (date) {
         if (!date) return null
