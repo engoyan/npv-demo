@@ -3,7 +3,7 @@
     :headers="headers"
     :items="data"
     hide-actions
-    class="elevation-1"
+    class="elevation-0"
   >
     <template slot="items" slot-scope="props">
       <td>{{ props.item.date }}</td>
